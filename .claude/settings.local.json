@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(lsof -ti:5173)",
+      "Bash(xargs kill *)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

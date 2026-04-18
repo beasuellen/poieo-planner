@@ -1,0 +1,743 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Gerenciador de tarefas</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="34636e4c-4e3b-8015-a3ff-ef38322872c6" class="page sans"><header><h1 class="page-title" dir="auto">Gerenciador de tarefas</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-8093-bb8a-f694cb112b95" class="">vamos aqui criar um sistema de gerenciamento de tarefas e que funcione dentro das seguintes regras:</p></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80b8-b1dc-ea5afe37e11b" class="bulleted-list"><li style="list-style-type:disc">deve ter um espaço para eu subir as tarefas do meu dia</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80d1-bfa3-cb6a5f0f352a" class="bulleted-list"><li style="list-style-type:disc">o objetivo principal aqui é eu conseguir visualizar bem claramente as tarefas do meu dia e semana, de forma que fique fácil de eu entender o que é e que principalmente me mostre uma barra de progresso e que eu tenha uma visao do quanto fui produtiva no dia</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8069-a046-e11945c96b01" class="bulleted-list"><li style="list-style-type:disc">devemos ter a possibilidade de taggear se é da kasper, pessoal, freela, igreja, curso, tcc…</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8087-a9a5-ecd7510871ad" class="bulleted-list"><li style="list-style-type:disc">quero que seja básico e claro</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8098-b148-e857e1995594" class="bulleted-list"><li style="list-style-type:disc">devemos tbm ter a possibilidade de ter um timer para eu ver quanto tempo fico focada no servico</li></ul></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-80f6-9a4c-de678f076864" class="">baseado no briefing basico que te forneci, me faca mais perguntas para que fique um sistema bonito e que mais pessoas possam utilizar relamente.</p></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-80a1-9ee6-f32ae3f69b48" class="">no caso, as etapas para a construcao do app será definir o briefing, ir pro claude code e depois fazer a deploy no vercel</p></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-80ce-aefa-eba2adaa87d8" class="">vamos primeiro definir os requisitos</p></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-801c-b0c4-fb344266ed31" class="">quero um design no estilo da imagem abaixo:</p></div><div style="display:contents" dir="ltr"><figure id="34636e4c-4e3b-80df-bfe1-f630cf00ce1b" class="image"><a href="Gerenciador%20de%20tarefas/image.png"><img style="width:641.9921875px" src="Gerenciador%20de%20tarefas/image.png"/></a></figure></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-807b-9c83-d4f4241e388f" class="numbered-list" start="1"><li>deverá ser salvo em localhost; o que significa isso de backup e sincronizacao?; sim, os dados devem ficar salvos.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-80ca-8a65-d90dd86d368a" class="numbered-list" start="2"><li>a tarefa deve vir com o espaço de titulo, descricao, data e horário do dia que eu vou reservar para fazer isso (estilo planner), deve conter um timer que ficar contando os minutos quando clicado, status de to do, doing, done e on hold. quero visualizar em formato de dia, mas que tenha um calendario pequeno que posso clicar no dia e aparece o que eu fiz. as tarefas sao diárias, mas posso planejar minha semana toda num dia apenas, entao posso alimentar ela inteira. sim, devemos colocar prioridade por cor e texto</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-804c-a98e-d50c7932339f" class="numbered-list" start="3"><li>o timer deverá ser clicado para comecar a contabilizar, para eu Entender quanto tempo gasto em uma task. sim, quero que mostre depois que finalizar mostre quanto tempo trabalhei nessa tarefa. o timer deverá ter pause e o finish</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-80c5-b683-defdd74e7e0e" class="numbered-list" start="4"><li>por enquanto sao essas tags que eu me lembro, sao algumas fixas que eu me recordo, mas depois posso adicionar mais se necessário. nao, todas podem ter a mesma cor. podemos ver multiplas tags simnultaneamente. vamos adicionar masi as seguintes tags: portfolio, orar, leitura biblica, pizzaria, tarefas de casa</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-8071-b0aa-f75a66e26ce7" class="numbered-list" start="5"><li>isso, quero o máximo de trackeamento da minha produtividade, cmo eu tenho procastinado demais, quero ter uma visao completa do quanto eu consigo produzir de fato. isso, quero que contabilize mei streak de produtividade</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-8032-9ec4-e6486e35a8a9" class="numbered-list" start="6"><li>quero light mode. animacoes suaves e intuitivas. quero celebracao sim. sim, quero a barra de progressao na home e tbm a tarefa em doing que esteja com o timer acionado. atencao, apenas podemos ter uma tarefa por vez em doing com o timer acionado, pois quero que seja bem fiel a minha necessidade e realidade.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-807e-8cb0-fe41d5dac24a" class="numbered-list" start="7"><li>preciso utilizar no desktop e no mobile. sobre ser web ou PWA pode escolher o mais fácil</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-8080-948c-d6aca566cf75" class="numbered-list" start="8"><li>ok, pode ser, mas precisamos deixar bem intuitivo, sem muitas distracoes, mas que cumpra bem seu principal propósito</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-802c-94ec-c0c136e8bfcb" class="numbered-list" start="9"><li>esqueca-se sobre a estética Y2K, quero que o design seja nesse estilo de design</li></ol></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-80c5-acb2-d83ae2c58e0d" class="">Perfeito! Entendi tudo. Vou analisar a imagem que você enviou para captar a essência do design.Entendi perfeitamente! A referência mostra um design <strong>limpo, elegante e minimalista</strong> com:</p></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8024-810f-c86be32a72a7" class="bulleted-list"><li style="list-style-type:disc">Cores suaves (azul profundo + brancos/off-white)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8092-a7a5-d2a0f10cfc92" class="bulleted-list"><li style="list-style-type:disc">Tipografia clara e sofisticada</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-809d-b060-d72dd2850dd9" class="bulleted-list"><li style="list-style-type:disc">Muito espaço em branco</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80fe-9771-ccc7cc385f6a" class="bulleted-list"><li style="list-style-type:disc">Ilustrações delicadas</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8080-9d7c-e939cda4a459" class="bulleted-list"><li style="list-style-type:disc">Foco total na funcionalidade</li></ul></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-802a-8436-fd550db3aabb" class="">Isso é bem diferente do Y2K — é mais <strong>moderne girlie minimalist</strong>. Perfeito para produtividade! 💙</p></div><div style="display:contents" dir="auto"><hr id="34636e4c-4e3b-8025-a216-db9ccb3cdcf6"/></div><div style="display:contents" dir="auto"><h2 id="34636e4c-4e3b-807d-a182-e3e679d83000" class="">📋 <strong>BRIEFING FINAL CONSOLIDADO</strong></h2></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-801c-8188-c6917541eaa2" class=""><strong>1. VISÃO GERAL</strong></h3></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-809a-a771-cc39e0424805" class=""><strong>App de Gerenciamento de Tarefas com Foco em Produtividade</strong></p></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-804c-861a-ddb51a13af45" class="bulleted-list"><li style="list-style-type:disc">Design minimalista elegante (referência: Coffee Haven)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8085-9934-ce791b09ca98" class="bulleted-list"><li style="list-style-type:disc">Versão web + responsivo para mobile e desktop</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8090-a403-e759ab819f37" class="bulleted-list"><li style="list-style-type:disc">Dados salvos em localStorage (persistem ao recarregar)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80ba-8132-ea9c8329bff5" class="bulleted-list"><li style="list-style-type:disc">Uma única tarefa pode estar em &quot;doing&quot; com timer por vez</li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-8079-a281-f80f487ec259" class=""><strong>2. ESTRUTURA DE DADOS</strong></h3></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-8039-8278-eb20f7c88296" class="">Cada tarefa tem:</p></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-807b-8778-d5cee45978ec" class="bulleted-list"><li style="list-style-type:disc">✅ <strong>Título</strong> (obrigatório)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80c6-a785-d1ef414fc031" class="bulleted-list"><li style="list-style-type:disc">📝 <strong>Descrição</strong> (opcional)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-800e-96a0-d73890b6f134" class="bulleted-list"><li style="list-style-type:disc">📅 <strong>Data e Horário</strong> (quando você vai fazer)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-802f-a827-d51ab6d04f86" class="bulleted-list"><li style="list-style-type:disc">🏷️ <strong>Tag</strong> (Kasper, Pessoal, Freela, Igreja, Curso, TCC, Portfolio, Orar, Leitura Bíblica, Pizzaria, Tarefas de Casa)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8060-87be-f415d013d31b" class="bulleted-list"><li style="list-style-type:disc">🎯 <strong>Prioridade</strong> (Alta/Média/Baixa) — indicada por cor + texto</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8015-999a-f713f7cd11ec" class="bulleted-list"><li style="list-style-type:disc">⏱️ <strong>Timer</strong> (clica para iniciar, pause/finish)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8007-b28b-f37cacc19e58" class="bulleted-list"><li style="list-style-type:disc">📊 <strong>Tempo Real Gasto</strong> (mostra após concluir)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80b8-b4c9-f884ea371df5" class="bulleted-list"><li style="list-style-type:disc">📌 <strong>Status</strong>: To Do → Doing → Done | On Hold</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8020-88fb-d56005477718" class="bulleted-list"><li style="list-style-type:disc">🎨 <strong>Cor de Prioridade</strong>:<div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80b0-8d72-f1c50efbbabc" class="bulleted-list"><li style="list-style-type:circle">🔴 Alta (vermelho/coral)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80a3-b359-dabdb1d1b030" class="bulleted-list"><li style="list-style-type:circle">🟡 Média (laranja/amarelo)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-806b-92a7-eef8d34afe89" class="bulleted-list"><li style="list-style-type:circle">🟢 Baixa (verde/azul)</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-8088-978d-d3d291dcad4c" class=""><strong>3. FUNCIONALIDADES PRINCIPAIS</strong></h3></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-805d-9fe5-cca9ff9741db" class=""><strong>Dashboard/Home</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-807a-b064-f10db8ded49d" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Barra de progresso geral do dia (tarefas concluídas/total)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8033-84e4-f39c74eb5a8a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Card destacado da tarefa em &quot;doing&quot; com timer ativo</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80b1-b8b4-c135c946484d" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Métrica rápida: Horas produtivas hoje, streak de produtividade</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80da-8206-ffada66d6fec" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Botão flutuante &quot;Nova Tarefa&quot;</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-801e-a9b1-e07b4ec3bfee" class=""><strong>Visualização Principal (Dia)</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8060-8291-eec19260386c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Calendário pequeno no topo (clica no dia, vê tarefas daquele dia)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80a3-9023-f91f5ddb5cd0" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Lista de tarefas do dia em formato de cards/rows</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80ef-bf01-c1123c47092c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Filtro por tag (ver múltiplas tags simultaneamente)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8028-9b44-e6dbcf330613" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Drag-and-drop para reordenar (opcional, mas legal)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80bc-88ac-e454b3aa6951" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Clica no card → abre modal com detalhes</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-80f3-aa79-c15606552227" class=""><strong>Modal de Tarefa</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80f2-a1c7-dba2fcedec97" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Título, descrição, data/horário, tag, prioridade (tudo editável)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80e8-b7dd-ecde7e4acfeb" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Status: botões To Do → Doing → Done | On Hold</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8033-9084-d6d255eeaa34" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked"><strong>Timer</strong>:</span><div class="indented"><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-807f-8afe-fa170ccf9f92" class="bulleted-list"><li style="list-style-type:disc">Clica para iniciar (começa a contar)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80e3-8c60-e909c4c48ef1" class="bulleted-list"><li style="list-style-type:disc">Botão Pause (pausa)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-801e-a8c3-fa227a876007" class="bulleted-list"><li style="list-style-type:disc">Botão Finish (finaliza e mostra tempo total gasto)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80dd-9e9e-cc92894705b9" class="bulleted-list"><li style="list-style-type:disc">Display: HH:MM:SS</li></ul></div></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-803a-84f7-c85cb067a0bb" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Histórico de tempo (após concluir: &quot;Você gastou 2h 15min nesta tarefa&quot;)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80f2-ad8d-fc4a11c839f8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Deletar tarefa</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-80e5-8b16-f3b3e9b10b93" class=""><strong>Estatísticas &amp; Produtividade</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8071-bcab-cfcb1c489827" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked"><strong>Hoje</strong>: Tarefas concluídas, tempo total focado, streak</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80ae-99aa-c53dffcae74f" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked"><strong>Essa semana</strong>: Gráfico de produtividade por dia</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8084-831a-ce096ad0867a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked"><strong>Streak</strong>: Dias consecutivos com at least 1 tarefa concluída</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80ff-a329-ebc47712da23" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Relatório simples (por tag, por prioridade)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-807c-a365-ee51ae9b5ee9" class=""><strong>Adicionar Nova Tarefa</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-801a-89fa-d106b5949561" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Modal limpo com campos: título, descrição, data/hora, tag, prioridade</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80ee-96ee-e8ba8fbbef17" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Salvamento automático em localStorage</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8029-a7d5-e5e85fbbdef2" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Feedback visual ao criar</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-8043-8045-ea86b719bfd8" class=""><strong>4. RESTRIÇÕES &amp; COMPORTAMENTOS</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-800e-9626-cab36d5a16c6" class="bulleted-list"><li style="list-style-type:disc">⚠️ <strong>Apenas 1 tarefa em &quot;doing&quot; com timer por vez</strong> — ao selecionar outra, a anterior pausa automaticamente</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8018-aada-c9afb47cd95c" class="bulleted-list"><li style="list-style-type:disc">⏸️ Timer pausa quando você fecha a aba? Não, continua rodando (mas app precisa estar aberto)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80dc-b9fb-c1edb94ecc5a" class="bulleted-list"><li style="list-style-type:disc">🗑️ Tarefas deletadas saem para sempre (sem trash/restauração)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80a8-84e1-d2f81b5b2b99" class="bulleted-list"><li style="list-style-type:disc">📱 PWA é optional — fazer como webapp comum primeiro (mais fácil)</li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-80b3-a93a-c33109b34efa" class=""><strong>5. DESIGN &amp; UX</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8027-b68b-d799d2b1996e" class="bulleted-list"><li style="list-style-type:disc"><strong>Paleta</strong>: Azul suave, brancos, tons de cinza, acentos em coral/verde para prioridades</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80c4-a17b-c44ab827d7ee" class="bulleted-list"><li style="list-style-type:disc"><strong>Tipografia</strong>: Sans-serif limpa (tipo Inter, Poppins, ou similar)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80c1-a0ee-c6fbcbeba9f5" class="bulleted-list"><li style="list-style-type:disc"><strong>Animações</strong>: Suaves e discretas (fade in/out, slide, progress bar animada)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80e3-a1ff-c555f331613a" class="bulleted-list"><li style="list-style-type:disc"><strong>Celebração</strong>: Confetti/efeito visual ao completar tarefa ✨</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8064-8482-ea99b1b0447d" class="bulleted-list"><li style="list-style-type:disc"><strong>Light mode</strong>: Primário, sem dark mode</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8053-8369-da29318a8443" class="bulleted-list"><li style="list-style-type:disc"><strong>Feedback</strong>: Toast notifications para ações (criou, deletou, pausou, finalizou)</li></ul></div><div style="display:contents" dir="auto"><h3 id="34636e4c-4e3b-803d-8eb7-dccc8c9856b1" class=""><strong>6. TECNOLOGIA RECOMENDADA</strong></h3></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8073-bdc7-c78ebcddd076" class="bulleted-list"><li style="list-style-type:disc"><strong>Frontend</strong>: React + TypeScript</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80b2-9d99-cbd78b779566" class="bulleted-list"><li style="list-style-type:disc"><strong>State</strong>: useState/useContext (simples, sem Redux)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80e6-b053-f04709c2c73d" class="bulleted-list"><li style="list-style-type:disc"><strong>Storage</strong>: localStorage + JSON</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8053-bb9a-d3b03bbedac0" class="bulleted-list"><li style="list-style-type:disc"><strong>Deploy</strong>: Vercel (como planejado)</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-8085-bba2-cadac1f8170b" class="bulleted-list"><li style="list-style-type:disc"><strong>Animações</strong>: Framer Motion (opcional) ou CSS puro</li></ul></div><div style="display:contents" dir="auto"><ul id="34636e4c-4e3b-80f7-87c1-f46d69c2606e" class="bulleted-list"><li style="list-style-type:disc"><strong>Toasts</strong>: React Hot Toast ou similar</li></ul></div><div style="display:contents" dir="auto"><hr id="34636e4c-4e3b-8042-9de5-e2cbaa2efdc3"/></div><div style="display:contents" dir="auto"><h2 id="34636e4c-4e3b-80e9-88f0-fbfa5948369a" class="">🎯 <strong>PRÓXIMOS PASSOS</strong></h2></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-8014-9af8-f94a1981869c" class="numbered-list" start="1"><li>✅ <strong>Briefing aprovado</strong> (você pode ajustar algo?)</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-80fb-b7b0-c774baf03378" class="numbered-list" start="2"><li>🚀 <strong>Claude Code</strong> → Construir a aplicação completa</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="34636e4c-4e3b-804f-9b5c-f1960266e8b2" class="numbered-list" start="3"><li>🌐 <strong>Deploy Vercel</strong> → Publicar e testar em produção</li></ol></div><div style="display:contents" dir="auto"><p id="34636e4c-4e3b-8049-ba64-d397603bc4b3" class=""><strong>Tem algo que você quer ajustar no briefing antes de começarmos a codificar?</strong> Tipo paleta de cores específica, alguma funcionalidade extra, ou retirar algo?</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
