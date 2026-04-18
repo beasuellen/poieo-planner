@@ -4,8 +4,8 @@
   "description": "Seu planner de foco e produtividade do dia a dia.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#570303",
-  "theme_color": "#570303",
+  "background_color": "#CC0420",
+  "theme_color": "#CC0420",
   "orientation": "portrait-primary",
   "icons": [
     {
