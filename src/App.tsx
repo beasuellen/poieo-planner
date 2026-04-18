@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGate } from "./components/AuthGate";
-import { TaskProvider } from "./context/TaskContext";
+import { TaskProvider, useTasks } from "./context/TaskContext";
 import { Header } from "./components/Header";
 import { MiniCalendar } from "./components/MiniCalendar";
 import { DayProgress } from "./components/DayProgress";
@@ -20,6 +20,32 @@ export default function App() {
       </AuthGate>
     </AuthProvider>
   );
+}
+
+function fmt(secs: number) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function TitleSync() {
+  const { doingTask, effectiveSeconds } = useTasks();
+
+  useEffect(() => {
+    if (doingTask?.timerStartedAt) {
+      const secs = effectiveSeconds(doingTask);
+      document.title = `▶ ${fmt(secs)} · ${doingTask.title}`;
+    } else if (doingTask) {
+      document.title = `⏸ ${doingTask.title} · Poieo`;
+    } else {
+      document.title = "Poieo · Planner";
+    }
+  });
+
+  return null;
 }
 
 function AppContent() {
@@ -40,6 +66,7 @@ function AppContent() {
 
   return (
     <TaskProvider>
+      <TitleSync />
       <div className="app-shell">
         <Header />
         <DoingBanner onOpen={setOpenTaskId} />
