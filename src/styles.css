@@ -1331,12 +1331,11 @@ kbd {
 
 .auth-monogram-corner {
   position: fixed;
-  right: -12px;
-  bottom: calc(-8px + env(safe-area-inset-bottom, 0px));
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   color: var(--pink);
   opacity: .12;
   pointer-events: none;
-  transform: rotate(-8deg);
 }
 
 /* Sign-out button in header */
