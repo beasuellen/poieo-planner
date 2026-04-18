@@ -1,9 +1,11 @@
 import { useTasks } from "../context/TaskContext";
+import { useAuth } from "../context/AuthContext";
 import { addDays, formatLongDate, isoDay } from "../lib/time";
 import { PoieoWordmark } from "./Logo";
 
 export function Header() {
   const { selectedDate, setSelectedDate } = useTasks();
+  const { signOut } = useAuth();
   const isToday = selectedDate === isoDay();
 
   return (
@@ -34,6 +36,15 @@ export function Header() {
           ›
         </button>
       </div>
+
+      <button
+        className="icon-btn header-signout"
+        aria-label="Sair da conta"
+        onClick={signOut}
+        title="Sair da conta"
+      >
+        ↩
+      </button>
     </header>
   );
 }

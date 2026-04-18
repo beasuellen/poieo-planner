@@ -72,11 +72,11 @@ kbd {
 /* ─── Header ───────────────────────────────────────────────────── */
 .app-header {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 16px;
-  padding: 0 32px;
-  height: 64px;
+  padding: env(safe-area-inset-top, 0px) 32px 0;
+  height: calc(64px + env(safe-area-inset-top, 0px));
   background: var(--wine);
   position: sticky;
   top: 0;
@@ -913,7 +913,8 @@ kbd {
 /* ─── FAB ──────────────────────────────────────────────────────── */
 .fab {
   position: fixed;
-  right: 28px; bottom: 28px;
+  right: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   width: 58px; height: 58px;
   border-radius: 50%;
   background: var(--red);
@@ -1190,9 +1191,9 @@ kbd {
   .bracket { font-size: 40px; }
 
   .app-header {
-    grid-template-columns: auto 1fr;
-    padding: 0 16px;
-    height: 56px;
+    grid-template-columns: auto 1fr auto;
+    padding: env(safe-area-inset-top, 0px) 16px 0;
+    height: calc(56px + env(safe-area-inset-top, 0px));
   }
   .date-long { font-size: 15px; }
 
@@ -1209,3 +1210,134 @@ kbd {
   .timer-display.big { font-size: 32px; }
   .bb-headline { font-size: 24px; }
 }
+
+/* ─── Auth screen ──────────────────────────────────────────────── */
+.auth-gate {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--wine);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: calc(40px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.auth-logo {
+  color: var(--pink);
+  margin-bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: .92;
+}
+
+.auth-statement {
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(235,209,255,.75);
+  margin: 0;
+  letter-spacing: .01em;
+}
+
+.auth-spinner-wrap {
+  color: var(--pink);
+  opacity: .5;
+  animation: spin 2.2s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-card {
+  background: var(--paper-2);
+  border-radius: 22px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-title {
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--wine);
+  margin: 0 0 6px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin: 0 0 22px;
+  line-height: 1.55;
+}
+
+.auth-input {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper-2);
+  outline: none;
+  transition: border-color .15s;
+  margin-bottom: 12px;
+}
+.auth-input:focus { border-color: var(--red); }
+
+.auth-error {
+  font-size: 13px;
+  color: var(--red);
+  margin: 0 0 12px;
+}
+
+.auth-success {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.auth-success-icon {
+  font-size: 44px;
+  margin-bottom: 14px;
+}
+
+.auth-success-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--wine);
+  margin: 0 0 8px;
+}
+
+.auth-success-text {
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.auth-footer {
+  margin-top: 32px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .03em;
+  color: rgba(235,209,255,.4);
+}
+
+.auth-monogram-corner {
+  position: fixed;
+  right: -12px;
+  bottom: calc(-8px + env(safe-area-inset-bottom, 0px));
+  color: var(--pink);
+  opacity: .12;
+  pointer-events: none;
+  transform: rotate(-8deg);
+}
+
+/* Sign-out button in header */
+.header-signout { margin-left: auto; }

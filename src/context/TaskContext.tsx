@@ -13,6 +13,8 @@ import { addDays, isoDay, weekDays } from "../lib/time";
 import { DEFAULT_TAGS } from "../lib/tags";
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "./AuthContext";
 
 export interface NewTaskInput {
   title: string;
@@ -52,23 +54,119 @@ function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
+// ── Supabase row helpers ─────────────────────────────────────────────────────
+
+function taskToRow(task: Task, userId: string) {
+  return {
+    id: task.id,
+    user_id: userId,
+    title: task.title,
+    description: task.description,
+    date: task.date,
+    time: task.time,
+    tags: task.tags,
+    priority: task.priority,
+    status: task.status,
+    created_at: task.createdAt,
+    completed_at: task.completedAt ?? null,
+    time_spent: task.timeSpent,
+    timer_started_at: task.timerStartedAt ?? null,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToTask(row: Record<string, any>): Task {
+  return {
+    id: row.id as string,
+    title: row.title as string,
+    description: (row.description as string) ?? "",
+    date: row.date as string,
+    time: (row.time as string) ?? "",
+    tags: (row.tags as string[]) ?? [],
+    priority: row.priority as Priority,
+    status: row.status as Status,
+    createdAt: row.created_at as number,
+    completedAt: (row.completed_at as number) ?? null,
+    timeSpent: (row.time_spent as number) ?? 0,
+    timerStartedAt: (row.timer_started_at as number) ?? null,
+  };
+}
+
+// ── Provider ─────────────────────────────────────────────────────────────────
+
 export function TaskProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
   const [store, setStore] = useState<Store>(() => loadStore());
   const [selectedDate, setSelectedDate] = useState<string>(isoDay());
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [now, setNow] = useState<number>(() => Date.now());
   const tickRef = useRef<number | null>(null);
+  const storeRef = useRef(store);
+  const userIdRef = useRef(userId);
 
-  useEffect(() => {
-    saveStore(store);
-  }, [store]);
+  // Keep refs up to date
+  useEffect(() => { storeRef.current = store; }, [store]);
+  useEffect(() => { userIdRef.current = userId; }, [userId]);
 
+  // Persist to localStorage
+  useEffect(() => { saveStore(store); }, [store]);
+
+  // Clock tick
   useEffect(() => {
     tickRef.current = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      if (tickRef.current) window.clearInterval(tickRef.current);
-    };
+    return () => { if (tickRef.current) window.clearInterval(tickRef.current); };
   }, []);
+
+  // ── Supabase: load on login ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!userId) return;
+
+    // Load tasks from Supabase
+    supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", userId)
+      .then(({ data, error }) => {
+        if (error || !data) return;
+
+        if (data.length > 0) {
+          // Supabase has data → use it as source of truth
+          setStore((prev) => ({ ...prev, tasks: data.map(rowToTask) }));
+        } else {
+          // Supabase is empty → upload local tasks
+          const localTasks = storeRef.current.tasks;
+          if (localTasks.length > 0) {
+            const rows = localTasks.map((t) => taskToRow(t, userId));
+            supabase.from("tasks").upsert(rows).then();
+          }
+        }
+      });
+
+    // Load custom tags from Supabase
+    supabase
+      .from("custom_tags")
+      .select("tags")
+      .eq("user_id", userId)
+      .single()
+      .then(({ data }) => {
+        if (data?.tags?.length) {
+          setStore((prev) => ({ ...prev, customTags: data.tags as string[] }));
+        } else {
+          // Upload local tags
+          const localTags = storeRef.current.customTags;
+          if (localTags.length > 0) {
+            supabase
+              .from("custom_tags")
+              .upsert({ user_id: userId, tags: localTags })
+              .then();
+          }
+        }
+      });
+  }, [userId]);
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
 
   const allTags = useMemo(() => {
     const set = new Set<string>([...DEFAULT_TAGS, ...store.customTags]);
@@ -94,6 +192,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     setStore((prev) => fn(prev));
   }, []);
 
+  // ── Mutations ─────────────────────────────────────────────────────────────
+
   const createTask = useCallback<Ctx["createTask"]>(
     (input) => {
       const task: Task = {
@@ -111,6 +211,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         timerStartedAt: null,
       };
       mutate((s) => ({ ...s, tasks: [...s.tasks, task] }));
+
+      const uid_ = userIdRef.current;
+      if (uid_) supabase.from("tasks").insert(taskToRow(task, uid_)).then();
+
       toast.success("Tarefa criada");
       return task;
     },
@@ -121,7 +225,13 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     (id, patch) => {
       mutate((s) => ({
         ...s,
-        tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        tasks: s.tasks.map((t) => {
+          if (t.id !== id) return t;
+          const updated = { ...t, ...patch };
+          const uid_ = userIdRef.current;
+          if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+          return updated;
+        }),
       }));
     },
     [mutate],
@@ -130,6 +240,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const deleteTask = useCallback<Ctx["deleteTask"]>(
     (id) => {
       mutate((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
+      const uid_ = userIdRef.current;
+      if (uid_) supabase.from("tasks").delete().eq("id", id).then();
       toast("Tarefa removida", { icon: "🗑️" });
     },
     [mutate],
@@ -141,11 +253,17 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       mutate((s) => {
         const tasks = s.tasks.map((t) => {
           if (t.id === id) {
-            return { ...t, status: "doing" as Status, timerStartedAt: ts };
+            const updated = { ...t, status: "doing" as Status, timerStartedAt: ts };
+            const uid_ = userIdRef.current;
+            if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+            return updated;
           }
           if (t.timerStartedAt) {
             const extra = Math.floor((ts - t.timerStartedAt) / 1000);
-            return { ...t, timeSpent: t.timeSpent + extra, timerStartedAt: null };
+            const updated = { ...t, timeSpent: t.timeSpent + extra, timerStartedAt: null };
+            const uid_ = userIdRef.current;
+            if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+            return updated;
           }
           return t;
         });
@@ -164,7 +282,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           if (t.id !== id) return t;
           if (!t.timerStartedAt) return t;
           const extra = Math.floor((ts - t.timerStartedAt) / 1000);
-          return { ...t, timeSpent: t.timeSpent + extra, timerStartedAt: null };
+          const updated = { ...t, timeSpent: t.timeSpent + extra, timerStartedAt: null };
+          const uid_ = userIdRef.current;
+          if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+          return updated;
         }),
       }));
     },
@@ -185,7 +306,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
             timerStartedAt = null;
           }
           const completedAt = status === "done" ? ts : null;
-          return { ...t, status, timeSpent, timerStartedAt, completedAt };
+          const updated = { ...t, status, timeSpent, timerStartedAt, completedAt };
+          const uid_ = userIdRef.current;
+          if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+          return updated;
         }),
       }));
     },
@@ -200,17 +324,18 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         const tasks = s.tasks.map((t) => {
           if (t.id !== id) return t;
           let timeSpent = t.timeSpent;
-          if (t.timerStartedAt) {
-            timeSpent += Math.floor((ts - t.timerStartedAt) / 1000);
-          }
+          if (t.timerStartedAt) timeSpent += Math.floor((ts - t.timerStartedAt) / 1000);
           totalSeconds = timeSpent;
-          return {
+          const updated = {
             ...t,
             status: "done" as Status,
             completedAt: ts,
             timeSpent,
             timerStartedAt: null,
           };
+          const uid_ = userIdRef.current;
+          if (uid_) supabase.from("tasks").upsert(taskToRow(updated, uid_)).then();
+          return updated;
         });
         return { ...s, tasks };
       });
@@ -227,7 +352,15 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (!trimmed) return;
       mutate((s) => {
         if (s.customTags.includes(trimmed) || DEFAULT_TAGS.includes(trimmed)) return s;
-        return { ...s, customTags: [...s.customTags, trimmed] };
+        const newTags = [...s.customTags, trimmed];
+        const uid_ = userIdRef.current;
+        if (uid_) {
+          supabase
+            .from("custom_tags")
+            .upsert({ user_id: uid_, tags: newTags })
+            .then();
+        }
+        return { ...s, customTags: newTags };
       });
     },
     [mutate],

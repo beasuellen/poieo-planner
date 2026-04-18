@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
+import { AuthGate } from "./components/AuthGate";
 import { TaskProvider } from "./context/TaskContext";
 import { Header } from "./components/Header";
 import { MiniCalendar } from "./components/MiniCalendar";
@@ -11,6 +13,16 @@ import { TaskModal } from "./components/TaskModal";
 import { NewTaskModal } from "./components/NewTaskModal";
 
 export default function App() {
+  return (
+    <AuthProvider>
+      <AuthGate>
+        <AppContent />
+      </AuthGate>
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
   const [newOpen, setNewOpen] = useState(false);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
 
